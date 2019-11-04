@@ -16,6 +16,7 @@ router.get('/', (req, res)=> {
 
 
 // TODO: GET account by ID
+// * returns an array with account 
 router.get('/:id', (req, res)=> {
      knex.select('*')
      .from('accounts')
@@ -30,26 +31,36 @@ router.get('/:id', (req, res)=> {
 
 
 // TODO: POST new account + authenticate data sent by client
+// * returns an array with id as first and only index
      // requires name + budget 
 router.post('/', validatePost, (req, res) => {
      knex.insert(req.body, 'id')
      .into('accounts')
      .then(response => {
-          res.status(200).json(response)
+          if(response.length > 0){
+               res.status(200).json(response)
+          } else {
+               res.status(500).json({error: 'Failed to post new account '})
+          }
      })
      .catch(error => {
-          res.status(500).json({error: 'Failed post new account'})
+          res.status(500).json({error: 'Failed to post new account'})
      })
 })
 
 
 // TODO: DELETE account
+// * returns a number (how many records were deleted)
 router.delete('/:id', (req, res) => {
      knex('accounts')
      .where({id:req.params.id})
      .del()
      .then(response => {
-          res.status(200).json(response)
+          if(response > 0){
+               res.status(200).json(response)  
+          } else {
+               res.status(500).json({error: "Failed to delete account"})
+          }
      })
      .catch(error => {
           res.status(500).json({error: 'Failed to delete account'})
@@ -58,6 +69,7 @@ router.delete('/:id', (req, res) => {
 
 
 // TODO: UPDATE account + validate data
+// * returns number (how many records/rows were updated)
 router.put('/:id', validatePost, (req, res) => {
      const changes = req.body
 
@@ -65,7 +77,11 @@ router.put('/:id', validatePost, (req, res) => {
      .where({id: req.params.id })
      .update(changes)
      .then(response => {
-          res.status(200).json(response)
+          if (response > 0){
+               res.status(200).json(response)
+          } else {
+               res.status(500).json({error: "Failed to  update account"})
+          }
      })
      .catch(error => {
           res.status(500).json({error: 'Failed to update account'})
